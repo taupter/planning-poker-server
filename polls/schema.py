@@ -2,8 +2,6 @@ import graphene
 from graphene_django import DjangoObjectType
 from django.db.models import Q
 
-from collections import Counter
-
 from users.schema import UserType
 from polls.models import Poll, Vote
 
