@@ -2,6 +2,8 @@ import graphene
 from graphene_django import DjangoObjectType
 from django.db.models import Q
 
+from collections import Counter
+
 from users.schema import UserType
 from polls.models import Poll, Vote
 
@@ -78,22 +80,36 @@ class CreatePoll(graphene.Mutation):
 
 class ClosePoll(graphene.Mutation):
     is_open = graphene.Boolean()
+    result = graphene.Int()
 
     class Arguments:
         poll_id = graphene.Int()
 
     def mutate(self, info, poll_id):
+        print("ClosePoll called: poll_id: ", poll_id)
         user = info.context.user
         if user.is_anonymous:
             raise Exception('You must be logged to close a poll.')
-# Must make a query and change
 
         if Poll.objects.filter(id=poll_id).count() == 0:
             raise Exception('Poll doesn\'t exist.')
 
         Poll.objects.filter(id=poll_id).update(is_open=False)
 
+        vote_counts = {}
+        votes = Vote.objects.filter(poll_id=poll_id)
+        for vote in votes:
+            if not vote.weight in vote_counts:
+                vote_counts[vote.weight] = 0
+
+            vote_counts[vote.weight]+=1
+
+        result = 0
+        for weight, count in vote_counts.items():
+            if count>=result:
+                result = weight
         return ClosePoll(
+            is_open=False, result=result
         )
 
 class CreateVote(graphene.Mutation):

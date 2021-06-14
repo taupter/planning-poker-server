@@ -9,6 +9,7 @@ class Poll(models.Model):
     description = models.TextField(blank=True)
     posted_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)
     is_open = models.BooleanField(default=True)
+    result = models.PositiveIntegerField(default=0)
 
 class Vote(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
